@@ -1,0 +1,9 @@
+{
+  "extends": "airbnb-base",
+  "rules": {
+    "import/no-extraneous-dependencies": ["error", { "devDependencies": ["**/test/**/*.js"] }],
+    "no-param-reassign": "off",
+    "no-underscore-dangle": "off",
+    "semi": ["error", "never"]
+  }
+}

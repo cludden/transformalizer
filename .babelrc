@@ -1,0 +1,10 @@
+{
+  "presets": [
+    "latest"
+  ],
+  "plugins": [
+    "add-module-exports",
+    "transform-object-rest-spread"
+  ],
+  "sourceMaps": "both"
+}
