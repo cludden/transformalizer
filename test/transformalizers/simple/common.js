@@ -11,7 +11,7 @@ export function determineLanguage({ language, languageAvailability, primaryLangu
   return undefined
 }
 
-export function topLevelLinks({ input, options }) {
+export function links({ input, options }) {
   if (!Array.isArray(input)) {
     return undefined
   }
@@ -23,7 +23,7 @@ export function topLevelLinks({ input, options }) {
   }
 }
 
-export function topLevelMeta({ input, options }) { // eslint-disable-line
+export function meta({ input, options }) { // eslint-disable-line
   const aggs = R.prop('aggs', options)
   if (!aggs) {
     return undefined
