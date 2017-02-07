@@ -4,9 +4,6 @@ import { links, meta } from './common'
 
 const schema = {
   name: 'person',
-  options: {
-    basePath: 'content/people',
-  },
   schema: {
     data: {
       id({ source, options, data }) { // eslint-disable-line

@@ -4,9 +4,6 @@ import { determineLanguage, links, meta } from './common'
 
 const article = {
   name: 'article',
-  options: {
-    basePath: 'content/articles',
-  },
   schema: {
     data: {
       type: R.always('article'),
@@ -42,8 +39,8 @@ const article = {
           const people = R.path(['_source', 'people'], data)
           const result = {
             links: {
-              self: `${options.baseUrl}/${options.basePath}/${id}/relationships/people`,
-              related: `${options.baseUrl}/${options.basePath}/${id}/people`,
+              self: `${options.baseUrl}/content/articles/${id}/relationships/people`,
+              related: `${options.baseUrl}/content/articles/${id}/people`,
             },
           }
           if (Array.isArray(people) && people.length) {
@@ -67,7 +64,7 @@ const article = {
 
       links({ options, id }) { // eslint-disable-line
         return {
-          self: `${options.baseUrl}/${options.basePath}/${id}${options.language ? `?language=${options.language}` : ''}`,
+          self: `${options.baseUrl}/content/articles/${id}${options.language ? `?language=${options.language}` : ''}`,
         }
       },
 

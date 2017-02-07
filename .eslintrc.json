@@ -2,8 +2,11 @@
   "extends": "airbnb-base",
   "rules": {
     "import/no-extraneous-dependencies": ["error", { "devDependencies": ["**/test/**/*.js"] }],
+    "max-len": "off",
+    "no-multi-assign": "off",
     "no-param-reassign": "off",
     "no-underscore-dangle": "off",
+    "no-use-before-define": "off",
     "semi": ["error", "never"]
   }
 }
