@@ -5,7 +5,7 @@ import { determineLanguage, links, meta } from './common'
 const article = {
   name: 'article',
   options: {
-    basePath: '/content/articles',
+    basePath: 'content/articles',
   },
   schema: {
     data: {
@@ -25,20 +25,20 @@ const article = {
           primaryLanguage,
         })
         // define spec with universal attributes
-        const spec = {
-          createdAt: R.prop('createdAt'),
+        const attributes = {
+          createdAt: R.prop('createdAt', src),
           primaryLanguage,
         }
         // if a language is available, add it to the spec
         if (options.language) {
-          spec.alternateTitle = R.prop(`alternateTitle_${options.language}`)
-          spec.title = R.prop(`title_${options.language}`)
+          attributes.alternateTitle = R.prop(`alternateTitle_${options.language}`, src)
+          attributes.title = R.prop(`title_${options.language}`, src)
         }
-        return R.applySpec(spec)(src)
+        return attributes
       },
 
       relationships: {
-        people({ source, options, data, id, attributes, include }) { // eslint-disable-line
+        people({ source, options, data, id, attributes }) { // eslint-disable-line
           const people = R.path(['_source', 'people'], data)
           const result = {
             links: {
@@ -49,18 +49,14 @@ const article = {
           if (Array.isArray(people) && people.length) {
             result.data = people.map((person) => {
               const { name, roles } = person
-              if (name) {
-                include('person', {
-                  _id: person.id,
-                  _source: person,
-                })
-              }
+              const included = !!name
               return {
                 name: 'person',
                 data: {
                   _id: person.id,
                   _source: person,
                 },
+                included,
                 meta: { roles },
               }
             })
@@ -69,7 +65,7 @@ const article = {
         },
       },
 
-      links({ attributes, data, id, input, options, relationships, type }) { // eslint-disable-line
+      links({ options, id }) { // eslint-disable-line
         return {
           self: `${options.baseUrl}/${options.basePath}/${id}${options.language ? `?language=${options.language}` : ''}`,
         }

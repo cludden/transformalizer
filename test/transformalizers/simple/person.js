@@ -18,32 +18,14 @@ const schema = {
       },
 
       attributes({ data, input, options }) { // eslint-disable-line
-        const src = R.propOr({}, '_source', data)
-        return R.applySpec({
-          first: R.pipe(R.prop('name'), R.split, R.head, R.toLower),
-          last: R.pipe(R.prop('name'), R.split, R.tail, R.toLower),
-          name: R.prop('name', R.toLower),
-        })(src)
-      },
-
-      relationships: {
-        images({ attributes, data, id, included, input, options }) { // eslint-disable-line
-          const images = R.path(['_source', 'images'], data)
-          const rel = {
-            links: {
-              self: `${options.baseUrl}/${options.basePath}/${id}/relationships/people`,
-              related: `${options.baseUrl}/${options.basePath}/${id}/people`,
-            },
-          }
-          if (Array.isArray(images) && images.length) {
-            rel.data = images.map(({ id: imageId, types }) => ({
-              type: 'image',
-              id: imageId,
-              meta: { types },
-            }))
-          }
-          return rel
-        },
+        const [first, last] = R.pipe(
+          R.pathOr('', ['_source', 'name']),
+          name => name.split(' '),
+        )(data)
+        return {
+          first,
+          last,
+        }
       },
     },
 

@@ -2,7 +2,7 @@ import qs from 'qs'
 import R from 'ramda'
 
 export function determineLanguage({ language, languageAvailability, primaryLanguage }) {
-  if (R.isString(language) && languageAvailability.indexOf(language) !== -1) {
+  if (R.is(String, language) && languageAvailability.indexOf(language) !== -1) {
     return language
   }
   if (R.is(String, primaryLanguage) || languageAvailability.indexOf(primaryLanguage) !== -1) {
