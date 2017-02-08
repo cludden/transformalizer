@@ -1,11 +1,16 @@
 # transformalizer
-a bare bones node module for building JSON API v1.0 compliant payloads.
 
-this module makes no assumption regarding the shape of your data or the datastores/sdks used.
+a bare bones node module for transforming raw data into JSON API v1.0 compliant payloads.
+
+this module:
+- makes no assumption regarding the shape of your data or the datastores/sdks used.
+- supports the full JSON API v1.0 specification
+- supports dynamic transformations, links, and meta at all levels of a document
 
 
 
 ## Installing
+
 ```shell
 $ npm install --save transformalizer
 ```
@@ -13,580 +18,38 @@ $ npm install --save transformalizer
 
 
 ## Getting Started
+
 Create a new transformalizer and register schemas
 ```javascript
-import createTransformalizer from 'transformalizer'
-import _ from 'lodash'
+import createTransformalizer from 'transformalizer';
 
 // create a new transformalizer
-const transformalizer = createTransformalizer({ url: 'https://api.example.com' })
+const transformalizer = createTransformalizer();
 
 // register a schema
 transformalizer.register({
   name: 'article',
-  schema: {
-    links({ source, options }) {
-      if (Array.isArray(source)) {
-        return { self: `${options.url}/articles` }
-      }
-      return undefined
-    },
-    meta({ source }) {
-      if (Array.isArray(source)) {
-        return { count: source.length }
-      }
-      return undefined
-    },
-    data: {
-      type() {
-        return 'article'
-      },
-      id({ data }) {
-        return data.id
-      },
-      attributes({ data }) {
-        return _(data)
-        .pick('title', 'body', 'createdAt')
-        .mapKeys((v, k) => _.snakeCase(k))
-      },
-      relationships: {
-        author({ data, options, id }) {
-          const { author } = data
-          const links = {
-            self: `${options.url}/articles/${id}/relationships/author`,
-            related: `${options.url}/articles/${id}/author`,
-          }
-          if (!author) {
-            return { links }
-          }
-          const included = _.isObject(author)
-          return {
-            data: {
-              name: 'user',
-              data: included ? author : { id: author },
-              included,
-            },
-            links,
-          }
-        },
-        comments({ data, options, id }) {
-          const { comments } = data
-          const links = {
-            self: `${options.url}/articles/${id}/relationships/comments`,
-            related: `${options.url}/articles/${id}/comments`,
-          }
-          if (!Array.isArray(comments) || !comments.length) {
-            return { links }
-          }
-          const included = _.isObject(comments[0])
-          return {
-            data: comments.map(comment => ({
-              name: 'comment',
-              data: included ? comment : { id: comment },
-              included,
-            })),
-            links,
-          }
-        }
-      },
-      links({ options, id }) {
-        return { self: `${options.url}/articles/${id}` }
-      }
-    }
-  }
-})
+  schema: { /* see below for schema details and examples */ },
+});
 
-// register related schemas
-transformalizer.register({
-  name: 'user',
-  schema: {
-    links({ source, options }) {
-      if (Array.isArray(source)) {
-        return { self: `${options.url}/users` }
-      }
-      return undefined
-    },
-    meta({ source }) {
-      if (Array.isArray(source)) {
-        return { count: source.length }
-      }
-      return undefined
-    },
-    data: {
-      type() {
-        return 'user'
-      },
-      id({ data }) {
-        return data.id
-      },
-      attributes({ data }) {
-        return _(data)
-        .pick('firstName', 'lastName', 'email')
-        .mapKeys((v, k) => _.snakeCase(k))
-      },
-      relationships: {
-        articles({ data, options, id }) {
-          const { articles } = data
-          const links = {
-            self: `${options.url}/users/${id}/relationships/articles`,
-            related: `${options.url}/users/${id}/articles`,
-          }
-          if (!Array.isArray(articles) || !articles.length) {
-            return { links }
-          }
-          const included = _.isObject(articles[0])
-          return {
-            data: articles.map(article => ({
-              name: 'article',
-              data: included ? article : { id: article },
-              included,
-            })),
-            links,
-          }
-        },
-        comments({ data, options, id }) {
-          const { comments } = data
-          const links = {
-            self: `${options.url}/articles/${id}/relationships/comments`,
-            related: `${options.url}/articles/${id}/comments`,
-          }
-          if (!Array.isArray(comments) || !comments.length) {
-            return { links }
-          }
-          const included = _.isObject(comments[0])
-          return {
-            data: comments.map(comment => ({
-              name: 'comment',
-              data: included ? comment : { id: comment },
-              included,
-            })),
-            links,
-          }
-        }
-      },
-      links({ options, id }) {
-        return { self: `${options.url}/users/${id}` }
-      }
-    }
-  }
-})
-
-transformalizer.register({
-  name: 'comment',
-  schema: {
-    data: {
-      type() {
-        return 'comment'
-      },
-      id({ data }) {
-        return data.id
-      },
-      attributes({ data }) {
-        return _.pick(data, 'body')
-      },
-      relationships: {
-        article({ data, options, id }) {
-          const { article } = data
-          const links = {
-            self: `${options.url}/users/${id}/relationships/article`,
-            related: `${options.url}/users/${id}/article`,
-          }
-          if (!article) {
-            return { links }
-          }
-          const included = _.isObject(article)
-          return {
-            data: {
-              name: 'article',
-              data: included ? article : { id: article },
-            },
-            links,
-          }
-        },
-        author({ data, options, id }) {
-          const { author } = data
-          const links = {
-            self: `${options.url}/articles/${id}/relationships/author`,
-            related: `${options.url}/articles/${id}/author`,
-          }
-          if (!author) {
-            return { links }
-          }
-          const included = _.isObject(author)
-          return {
-            data: {
-              name: 'user',
-              data: included ? author : { id: author },
-            },
-            links,
-          }
-        }
-      },
-      links({ options, id }) {
-        return { self: `${options.url}/comments/${id}` }
-      }
-    }
-  }
-})
+// transform raw data into a valid JSON API v1.0 document
+const document = transformalizer.transform({ name: 'article', source });
+console.log(JSON.stringify(document));
 ```
 
-Get a hold of some raw data
-```javascript
-const source = [
-  {
-    id: 1,
-    body: 'Hello, World!',
-    createdAt: '2017-02-08T04:56:41.644Z',
-    author: {
-      id: 2,
-      firstName: 'A$AP',
-      lastName: 'Ferg',
-      email: 'ferg@example.com',
-    },
-    comments: [
-      {
-        author: {
-          id: 1,
-          firstName: 'Kanye',
-          lastName: 'West',
-          email: 'kwest@example.com',
-        },
-        id: 1,
-        body: 'Nice article Ferg!',
-        article: 1,
-      },
-      {
-        author: {
-          id: 2,
-          firstName: 'A$AP',
-          lastName: 'Ferg',
-          email: 'ferg@example.com',
-        },
-        id: 2,
-        body: 'Thanks Yeezy!',
-        article: 1,
-      },
-    ],
-  },
-  {
-    id: 2,
-    body: 'Hola, World!',
-    createdAt: '2017-02-08T04:56:41.644Z',
-    author: {
-      id: 1,
-      firstName: 'Kanye',
-      lastName: 'West',
-      email: 'kwest@example.com',
-    },
-    comments: [
-      {
-        author: {
-          id: 2,
-          firstName: 'A$AP',
-          lastName: 'Ferg',
-          email: 'ferg@example.com',
-        },
-        id: 3,
-        body: 'First!',
-        article: 2,
-      },
-      {
-        author: {
-          id: 1,
-          firstName: 'Kanye',
-          lastName: 'West',
-          email: 'kwest@example.com',
-        },
-        id: 4,
-        body: 'nah man',
-        article: 2,
-      },
-    ],
-  },
-]
-const document = transformalizer.transform({ name: 'article', source })
-console.log(JSON.stringify(document))
-```
-which yields
-```json
-{
-    "jsonapi": {
-        "version": "1.0"
-    },
-    "links": {
-        "self": "https://api.example.com/articles"
-    },
-    "meta": {
-        "count": 2
-    },
-    "data": [
-        {
-            "type": "article",
-            "id": "1",
-            "attributes": {
-                "body": "Hello, World!",
-                "created_at": "2017-02-08T04:56:41.644Z"
-            },
-            "relationships": {
-                "author": {
-                    "data": {
-                        "type": "user",
-                        "id": "2"
-                    },
-                    "links": {
-                        "self": "https://api.example.com/articles/1/relationships/author",
-                        "related": "https://api.example.com/articles/1/author"
-                    }
-                },
-                "comments": {
-                    "data": [
-                        {
-                            "type": "comment",
-                            "id": "1"
-                        },
-                        {
-                            "type": "comment",
-                            "id": "2"
-                        }
-                    ],
-                    "links": {
-                        "self": "https://api.example.com/articles/1/relationships/comments",
-                        "related": "https://api.example.com/articles/1/comments"
-                    }
-                }
-            },
-            "links": {
-                "self": "https://api.example.com/articles/1"
-            }
-        },
-        {
-            "type": "article",
-            "id": "2",
-            "attributes": {
-                "body": "Hola, World!",
-                "created_at": "2017-02-08T04:56:41.644Z"
-            },
-            "relationships": {
-                "author": {
-                    "data": {
-                        "type": "user",
-                        "id": "1"
-                    },
-                    "links": {
-                        "self": "https://api.example.com/articles/2/relationships/author",
-                        "related": "https://api.example.com/articles/2/author"
-                    }
-                },
-                "comments": {
-                    "data": [
-                        {
-                            "type": "comment",
-                            "id": "3"
-                        },
-                        {
-                            "type": "comment",
-                            "id": "4"
-                        }
-                    ],
-                    "links": {
-                        "self": "https://api.example.com/articles/2/relationships/comments",
-                        "related": "https://api.example.com/articles/2/comments"
-                    }
-                }
-            },
-            "links": {
-                "self": "https://api.example.com/articles/2"
-            }
-        }
-    ],
-    "included": [
-        {
-            "type": "user",
-            "id": "2",
-            "attributes": {
-                "first_name": "A$AP",
-                "last_name": "Ferg",
-                "email": "ferg@example.com"
-            },
-            "relationships": {
-                "articles": {
-                    "links": {
-                        "self": "https://api.example.com/users/2/relationships/articles",
-                        "related": "https://api.example.com/users/2/articles"
-                    }
-                },
-                "comments": {
-                    "links": {
-                        "self": "https://api.example.com/articles/2/relationships/comments",
-                        "related": "https://api.example.com/articles/2/comments"
-                    }
-                }
-            },
-            "links": {
-                "self": "https://api.example.com/users/2"
-            }
-        },
-        {
-            "type": "comment",
-            "id": "1",
-            "attributes": {
-                "body": "Nice article Ferg!"
-            },
-            "relationships": {
-                "article": {
-                    "data": {
-                        "type": "article",
-                        "id": "1"
-                    },
-                    "links": {
-                        "self": "https://api.example.com/users/1/relationships/article",
-                        "related": "https://api.example.com/users/1/article"
-                    }
-                },
-                "author": {
-                    "data": {
-                        "type": "user",
-                        "id": "1"
-                    },
-                    "links": {
-                        "self": "https://api.example.com/articles/1/relationships/author",
-                        "related": "https://api.example.com/articles/1/author"
-                    }
-                }
-            },
-            "links": {
-                "self": "https://api.example.com/comments/1"
-            }
-        },
-        {
-            "type": "comment",
-            "id": "2",
-            "attributes": {
-                "body": "Thanks Yeezy!"
-            },
-            "relationships": {
-                "article": {
-                    "data": {
-                        "type": "article",
-                        "id": "1"
-                    },
-                    "links": {
-                        "self": "https://api.example.com/users/2/relationships/article",
-                        "related": "https://api.example.com/users/2/article"
-                    }
-                },
-                "author": {
-                    "data": {
-                        "type": "user",
-                        "id": "2"
-                    },
-                    "links": {
-                        "self": "https://api.example.com/articles/2/relationships/author",
-                        "related": "https://api.example.com/articles/2/author"
-                    }
-                }
-            },
-            "links": {
-                "self": "https://api.example.com/comments/2"
-            }
-        },
-        {
-            "type": "user",
-            "id": "1",
-            "attributes": {
-                "first_name": "Kanye",
-                "last_name": "West",
-                "email": "kwest@example.com"
-            },
-            "relationships": {
-                "articles": {
-                    "links": {
-                        "self": "https://api.example.com/users/1/relationships/articles",
-                        "related": "https://api.example.com/users/1/articles"
-                    }
-                },
-                "comments": {
-                    "links": {
-                        "self": "https://api.example.com/articles/1/relationships/comments",
-                        "related": "https://api.example.com/articles/1/comments"
-                    }
-                }
-            },
-            "links": {
-                "self": "https://api.example.com/users/1"
-            }
-        },
-        {
-            "type": "comment",
-            "id": "3",
-            "attributes": {
-                "body": "First!"
-            },
-            "relationships": {
-                "article": {
-                    "data": {
-                        "type": "article",
-                        "id": "2"
-                    },
-                    "links": {
-                        "self": "https://api.example.com/users/3/relationships/article",
-                        "related": "https://api.example.com/users/3/article"
-                    }
-                },
-                "author": {
-                    "data": {
-                        "type": "user",
-                        "id": "2"
-                    },
-                    "links": {
-                        "self": "https://api.example.com/articles/3/relationships/author",
-                        "related": "https://api.example.com/articles/3/author"
-                    }
-                }
-            },
-            "links": {
-                "self": "https://api.example.com/comments/3"
-            }
-        },
-        {
-            "type": "comment",
-            "id": "4",
-            "attributes": {
-                "body": "nah man"
-            },
-            "relationships": {
-                "article": {
-                    "data": {
-                        "type": "article",
-                        "id": "2"
-                    },
-                    "links": {
-                        "self": "https://api.example.com/users/4/relationships/article",
-                        "related": "https://api.example.com/users/4/article"
-                    }
-                },
-                "author": {
-                    "data": {
-                        "type": "user",
-                        "id": "1"
-                    },
-                    "links": {
-                        "self": "https://api.example.com/articles/4/relationships/author",
-                        "related": "https://api.example.com/articles/4/author"
-                    }
-                }
-            },
-            "links": {
-                "self": "https://api.example.com/comments/4"
-            }
-        }
-    ]
-}
-```
+
+
+## Examples
+
+See examples in the examples folder of this repository.
+- [basic](/examples/basic.js)
+
+
 
 ## API
 
 ### createTransformalizer([options]) => transformalizer
+
 Create a new transformalizer object
 
 ###### Parameters
@@ -594,7 +57,18 @@ Create a new transformalizer object
 | --- | --- | --- |
 | [options={}] | Object | global options shared between all schemas |
 
+###### Examples
+```javascript
+const createTransformalizer = require('transformalizer')
+
+const transformalizer = createTransformalizer()
+```
+
+---
+
 ### transformalizer.register(params)
+
+Register a new document schema.
 
 ###### Parameters
 | Name | Type | Description |
@@ -603,7 +77,20 @@ Create a new transformalizer object
 | params.name | String | schema name |
 | params.schema | Object | mappings for type, see [Schema](#schema) for more details |
 
+###### Examples
+```javascript
+transformalizer.register({
+  name: 'blog-post',
+  schema: {
+    // ..
+  }
+})
+```
+
+---
+
 ### transformalizer.transform(params) => Object
+
 Build a json api document using the schema with specified name and with the given source data.
 
 ###### Parameters
@@ -614,28 +101,62 @@ Build a json api document using the schema with specified name and with the give
 | params.source | Object|Object[] | source data |
 | [params.options={}] | Object | additional data to be passed to transform functions, this will be merged with the global options |
 
+###### Examples
+```javascript
+const blogPost = { title: 'Hello, World!', body: 'To be continued...', createdAt: new Date() }
+const document = transformalizer.transform({ name: 'blog-post', source: blogPost })
+```
+
 
 
 ## Schema
+
 A schema object defines a set of functions used to transform your raw data into a valid JSON API document. It has the following basic structure (that closely resembles a json api document), which is described in more detail below
-```
+```javascript
 {
-  links({ source, options, document }) => Object,
-  meta({ source, options, document }) => Object,
+  links({ source, options, document }) {
+    return { /* top level links */ };
+  },
+  meta({ source, options, document }) {
+    return { /* top level meta */ };
+  },
   data: {
-    type({ source, options, data }) => String,
-    id({ source, options, data, type }) => String,
-    attributes({ source, options, data, type, id }) => Object,
-    relationships: {
-      [rel]({ source, options, data, type, id, attributes }) => Object
+    type({ source, options, data }) {
+      return 'my-type';
     },
-    links({ source, options, data, type, id, attributes, relationships }) => Object,
-    meta({ source, options, data, type, id, attributes, relationships }) => Object
+    id({ source, options, data, type }) {
+      return data.id.toString();
+    },
+    attributes({ source, options, data, type, id }) {
+      return { /* resource attributes */ }
+    },
+    relationships: {
+      // ..
+      [key]({ source, options, data, type, id, attributes }) {
+        return {
+          data: {
+            name: 'related-schema',
+            data: { /* relationship data to be passed to other schema */ },
+            included: true,
+          },
+          links: { /* relationship links if available */ },
+          meta: { /* relationship meta if available */ }
+        }
+      },
+      // ..
+    },
+    links({ source, options, data, type, id, attributes, relationships }) {
+      return { /* resource links if available */ }
+    },
+    meta({ source, options, data, type, id, attributes, relationships }) {
+      return { /* resource meta if available */ }
+    }
   }
 }
 ```
 
-### links(params) => Object
+### links(params) => Object <small>optional</small>
+
 A function that should return the top level links object.
 
 ###### Parameters
@@ -649,7 +170,8 @@ A function that should return the top level links object.
 
 ---
 
-### meta(params) => Object
+### meta(params) => Object <small>optional</small>
+
 A function that should return the top level meta object.
 
 ###### Parameters
@@ -663,8 +185,9 @@ A function that should return the top level meta object.
 
 ---
 
-### data.type(params) => String
-A function that should return the type of the resource being processed. If this returns a type other than the schema type, the other schema will be used in place of the current schema.
+### data.type(params) => String <small>optional</small>
+
+A function that should return the type of the resource being processed. If this is not provided, the name of the schema will be used as the resource type.
 
 ###### Parameters
 | Name | Type | Description |
@@ -676,8 +199,9 @@ A function that should return the type of the resource being processed. If this 
 
 ---
 
-### data.id(params) => String
-A function that should return the id of the resource being processed.
+### data.id(params) => String <small>optional</small>
+
+A function that should return the id of the resource being processed. If this is not provided, it is assumed that the "id" of the resource is simply the "id" property of the source object.
 
 ###### Parameters
 | Name | Type | Description |
@@ -690,7 +214,8 @@ A function that should return the id of the resource being processed.
 
 ---
 
-### data.attributes(params) => Object
+### data.attributes(params) => Object <small>optional</small>
+
 A function that should return the attributes portion of the resource being processed. If a null or undefined value is returned, no attributes will be included on the resource.
 
 ###### Parameters
@@ -705,7 +230,8 @@ A function that should return the attributes portion of the resource being proce
 
 ---
 
-### data.relationships.*key*(params) => Object
+### data.relationships.*key*(params) => Object <small>optional</small>
+
 A map of relationship keys to functions that should return a valid [relationship object](http://jsonapi.org/format/#document-resource-object-relationships) with one caveat outlined below. If a null or undefined value is returned, that relationship will be excluded from the relationships object.
 
 **Caveat:** The data property of the relationship object should either be a single object or an array of objects in the form shown below
@@ -731,7 +257,8 @@ A map of relationship keys to functions that should return a valid [relationship
 
 ---
 
-### data.links(params) => Object
+### data.links(params) => Object <small>optional</small>
+
 A function that should return the links object for the current resource. If a null or undefined value is returned, no links will be included on the resource.
 
 ###### Parameters
@@ -748,7 +275,8 @@ A function that should return the links object for the current resource. If a nu
 
 ---
 
-### data.meta(params) => Object
+### data.meta(params) => Object <small>optional</small>
+
 A function that should return the meta object for the current resource. If a null or undefined value is returned, no attributes will be included on the resource.
 
 ###### Parameters
@@ -767,6 +295,7 @@ A function that should return the meta object for the current resource. If a nul
 
 
 ## Test
+
 Run the test suite
 ```shell
 $ npm test
@@ -780,6 +309,7 @@ $ npm run coverage
 
 
 ## Contributing
+
 1. [Fork it](https://github.com/GaiamTV/transformalizer/fork)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
@@ -788,6 +318,13 @@ $ npm run coverage
 
 
 
+## Semver
+
+Until transformalizer reaches a 1.0 release, breaking changes will be released with a new minor version. For example 0.5.1, and 0.5.4 will have the same API, but 0.6.0 will have breaking changes.
+
+
+
 ## License
-Copyright (c) 2017 Gaia.
+
+Copyright (c) 2017 Gaia.  
 Licensed under the [MIT license](LICENSE.md).

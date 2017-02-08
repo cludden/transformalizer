@@ -1,7 +1,7 @@
-import { expect } from 'chai'
-import _ from 'lodash'
+/* eslint no-console: off */
+const _ = require('lodash')
 
-import createTransformalizer from '../../lib/transformalizer'
+const createTransformalizer = require('../dist/transformalizer')
 
 // create a new transformalizer
 const transformalizer = createTransformalizer({ url: 'https://api.example.com' })
@@ -184,6 +184,7 @@ transformalizer.register({
             data: {
               name: 'article',
               data: included ? article : { id: article },
+              included,
             },
             links,
           }
@@ -202,6 +203,7 @@ transformalizer.register({
             data: {
               name: 'user',
               data: included ? author : { id: author },
+              included,
             },
             links,
           }
@@ -262,16 +264,39 @@ const comments = [{
   article: 2,
 }]
 
-const source = articles.map((article) => {
+// build a document of normalized articles
+let source = articles
+console.log(JSON.stringify(source))
+console.log()
+
+let document = transformalizer.transform({ name: 'article', source })
+console.log(JSON.stringify(document))
+console.log()
+
+// build a compound document of denormalized/hydrated articles
+source = articles.map((article) => {
   const populated = _.pick(article, 'id', 'body', 'createdAt')
   populated.author = _.find(users, { id: article.author })
-  populated.comments = _.filter(comments, { article: article.id }).map(({ author, ...others }) => ({
-    author: _.find(users, { id: author }),
-    ...others,
+  populated.comments = _.filter(comments, { article: article.id }).map(comment => ({
+    author: _.find(users, { id: comment.author }),
+    body: comment.body,
+    article: comment.article,
+    id: comment.id,
   }))
   return populated
 })
-
 console.log(JSON.stringify(source))
-const document = transformalizer.transform({ name: 'article', source })
+console.log()
+
+document = transformalizer.transform({ name: 'article', source })
 console.log(JSON.stringify(document))
+console.log()
+
+// build a compound document using a single article
+source = source[0]
+console.log(JSON.stringify(source))
+console.log()
+
+document = transformalizer.transform({ name: 'article', source })
+console.log(JSON.stringify(document))
+console.log()
