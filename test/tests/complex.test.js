@@ -242,4 +242,14 @@ describe('complex', function () {
       expect(tag.attributes).to.have.property('desc', s.desc)
     })
   })
+
+  it('uses dataSchema if provided', function () {
+    const collection = _.sample(collections)
+    const source = collection.content
+    const document = transformalizer.transform({ name: 'content', source, options: { collection } })
+    expect(document).to.have.property('data').that.is.an('array')
+    document.data.forEach((resource, i) => {
+      expect(resource).to.have.property('type', source[i]._type)
+    })
+  })
 })
