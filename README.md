@@ -1,5 +1,5 @@
 # transformalizer
-a bare bones toolkit for building JSON API v1.0 compliant payloads.
+a bare bones node module for building JSON API v1.0 compliant payloads.
 
 *Note: not ready for production use*
 
