@@ -121,6 +121,9 @@ A schema object defines a set of functions used to transform your raw data into 
     return { /* top level meta */ };
   },
   data: {
+    dataSchema({ source, options, data }) {
+      return 'other-schema-name'
+    },
     type({ source, options, data }) {
       return 'my-type';
     },
@@ -291,6 +294,20 @@ A function that should return the meta object for the current resource. If a nul
 | params.attributes | Object | the attributes object of the current resource, determined in the `data.attributes` step |
 | params.relationships | Object | the relationships object of the current resource, determined in the `data.relationships` step |
 | params.links | Object | the links object of the current resource, determined in the `data.links` step |
+
+---
+
+### data.dataSchema(params) => String <small>optional</small>
+
+A function that should return the name of a schema to use to transform the current source object. Useful for building documents who's primary data is a collection of multiple types.
+
+###### Parameters
+| Name | Type | Description |
+| --- | --- | --- |
+| params | Object | |
+| params.source | Object[],Object | the source data passed to the #transform function |
+| params.options | Object | any options passed to the #transform function |
+| params.data | Object | the current item being processed when source is an array, or the source itself if not an array |
 
 
 
