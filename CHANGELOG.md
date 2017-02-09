@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.1.2"></a>
+## [0.1.2](https://github.com/GaiamTV/transformalizer/compare/v0.1.1...v0.1.2) (2017-02-09)
+
+
+### Bug Fixes
+
+* **no-attributes:** dont throw during transform if no attributes hook defined ([e1b272d](https://github.com/GaiamTV/transformalizer/commit/e1b272d))
+
+
+
 <a name="0.1.1"></a>
 ## [0.1.1](https://github.com/GaiamTV/transformalizer/compare/v0.1.0...v0.1.1) (2017-02-08)
 
