@@ -209,5 +209,11 @@ describe('errors and coverage', function () {
       expect(transformalizer.transform.bind(null, { name: 'invalid-relationship-name', source: { id: 1 } }))
       .to.throw(Error)
     })
+
+    it('should throw not throw if no attributes hook present', function () {
+      transformalizer.register({ name: 'transform-no-attributes' })
+      expect(transformalizer.transform.bind(null, { name: 'transform-no-attributes', source: { id: 1 } }))
+      .to.not.throw(Error)
+    })
   })
 })
