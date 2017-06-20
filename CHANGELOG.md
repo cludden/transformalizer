@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.0.0-beta.0"></a>
+# [1.0.0-beta.0](https://github.com/GaiamTV/transformalizer/compare/v0.1.4...v1.0.0-beta.0) (2017-06-20)
+
+
+### Bug Fixes
+
+* **docs:** update outdated docs, closes [#12](https://github.com/GaiamTV/transformalizer/issues/12) ([7daa893](https://github.com/GaiamTV/transformalizer/commit/7daa893))
+
+
+### Features
+
+* **state:** refactors options into options and state ([fb46919](https://github.com/GaiamTV/transformalizer/commit/fb46919))
+
+
+### BREAKING CHANGES
+
+* **state:** removes `clone` dependency and options immutability for performance improvements
+
+
+
 <a name="0.1.4"></a>
 ## [0.1.4](https://github.com/GaiamTV/transformalizer/compare/v0.1.3...v0.1.4) (2017-05-04)
 

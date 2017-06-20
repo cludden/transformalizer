@@ -1,6 +1,6 @@
 {
   "name": "transformalizer",
-  "version": "0.1.4",
+  "version": "1.0.0-beta.0",
   "description": "a bare bones node module for building JSON API v1.0 compliant payloads",
   "main": "./dist/transformalizer.js",
   "keywords": [
