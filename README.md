@@ -124,18 +124,18 @@ A schema object defines a set of functions used to transform your raw data into 
     dataSchema({ source, options, data }) {
       return 'other-schema-name'
     },
-    type({ source, options, data }) {
+    type({ source, options, data, state }) {
       return 'my-type';
     },
-    id({ source, options, data, type }) {
+    id({ source, options, data, type, state }) {
       return data.id.toString();
     },
-    attributes({ source, options, data, type, id }) {
+    attributes({ source, options, data, type, id, state }) {
       return { /* resource attributes */ }
     },
     relationships: {
       // ..
-      [key]({ source, options, data, type, id, attributes }) {
+      [key]({ source, options, data, type, id, attributes, state }) {
         return {
           data: {
             name: 'related-schema',
@@ -148,10 +148,10 @@ A schema object defines a set of functions used to transform your raw data into 
       },
       // ..
     },
-    links({ source, options, data, type, id, attributes, relationships }) {
+    links({ source, options, data, type, id, attributes, relationships, state }) {
       return { /* resource links if available */ }
     },
-    meta({ source, options, data, type, id, attributes, relationships }) {
+    meta({ source, options, data, type, id, attributes, relationships, state }) {
       return { /* resource meta if available */ }
     }
   }
@@ -199,6 +199,7 @@ A function that should return the type of the resource being processed. If this 
 | params.source | Object[],Object | the source data passed to the #transform function |
 | params.options | Object | any options passed to the #transform function |
 | params.data | Object | the current item being processed when source is an array, or the source itself if not an array |
+| params.state | Object | the recommended namespace for passing information between data level methods, useful for storing calculated data that is needed in multiple places |
 
 ---
 
@@ -214,6 +215,7 @@ A function that should return the id of the resource being processed. If this is
 | params.options | Object | any options passed to the #transform function |
 | params.data | Object | the current item being processed when source is an array, or the source itself if not an array |
 | params.type | String | the resource type determined in the `data.type` step |
+| params.state | Object | the recommended namespace for passing information between data level methods, useful for storing calculated data that is needed in multiple places |
 
 ---
 
@@ -230,6 +232,7 @@ A function that should return the attributes portion of the resource being proce
 | params.data | Object | the current item being processed when source is an array, or the source itself if not an array |
 | params.type | String | the resource type determined in the `data.type` step |
 | params.id | String | the id of the current resource, determined in the `data.id` step |
+| params.state | Object | the recommended namespace for passing information between data level methods, useful for storing calculated data that is needed in multiple places |
 
 ---
 
@@ -257,6 +260,7 @@ A map of relationship keys to functions that should return a valid [relationship
 | params.type | String | the resource type determined in the `data.type` step |
 | params.id | String | the id of the current resource, determined in the `data.id` step |
 | params.attributes | Object | the attributes object of the current resource, determined in the `data.attributes` step |
+| params.state | Object | the recommended namespace for passing information between data level methods, useful for storing calculated data that is needed in multiple places |
 
 ---
 
@@ -275,6 +279,7 @@ A function that should return the links object for the current resource. If a nu
 | params.id | String | the id of the current resource, determined in the `data.id` step |
 | params.attributes | Object | the attributes object of the current resource, determined in the `data.attributes` step |
 | params.relationships | Object | the relationships object of the current resource, determined in the `data.relationships` step |
+| params.state | Object | the recommended namespace for passing information between data level methods, useful for storing calculated data that is needed in multiple places |
 
 ---
 
@@ -294,6 +299,7 @@ A function that should return the meta object for the current resource. If a nul
 | params.attributes | Object | the attributes object of the current resource, determined in the `data.attributes` step |
 | params.relationships | Object | the relationships object of the current resource, determined in the `data.relationships` step |
 | params.links | Object | the links object of the current resource, determined in the `data.links` step |
+| params.state | Object | the recommended namespace for passing information between data level methods, useful for storing calculated data that is needed in multiple places |
 
 ---
 
