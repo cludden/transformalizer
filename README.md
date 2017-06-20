@@ -114,10 +114,10 @@ const document = transformalizer.transform({ name: 'blog-post', source: blogPost
 A schema object defines a set of functions used to transform your raw data into a valid JSON API document. It has the following basic structure (that closely resembles a json api document), which is described in more detail below
 ```javascript
 {
-  links({ source, options, document }) {
+  links({ source, options, data, included }) {
     return { /* top level links */ };
   },
-  meta({ source, options, document }) {
+  meta({ source, options, data, included }) {
     return { /* top level meta */ };
   },
   data: {
