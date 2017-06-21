@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.0.0-beta.1"></a>
+# [1.0.0-beta.1](https://github.com/GaiamTV/transformalizer/compare/v1.0.0-beta.0...v1.0.0-beta.1) (2017-06-21)
+
+
+### Features
+
+* expose additional methods to improve modular use cases and testability ([1f425a7](https://github.com/GaiamTV/transformalizer/commit/1f425a7))
+
+
+
 <a name="1.0.0-beta.0"></a>
 # [1.0.0-beta.0](https://github.com/GaiamTV/transformalizer/compare/v0.1.4...v1.0.0-beta.0) (2017-06-20)
 
