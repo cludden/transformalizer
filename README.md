@@ -341,13 +341,7 @@ $ npm run coverage
 
 
 
-## Semver
-
-Until transformalizer reaches a 1.0 release, breaking changes will be released with a new minor version. For example 0.5.1, and 0.5.4 will have the same API, but 0.6.0 will have breaking changes.
-
-
-
 ## License
 
-Copyright (c) 2017 Gaia.  
+Copyright (c) 2017 Gaia.
 Licensed under the [MIT license](LICENSE.md).
