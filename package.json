@@ -18,7 +18,8 @@
     "coverage": "./node_modules/.bin/babel-node ./node_modules/.bin/babel-istanbul cover ./node_modules/.bin/_mocha test/tests/*.test.js",
     "postversion": "npm run build",
     "release": "npm run build && standard-version",
-    "test": "mocha --compilers js:babel-register test/tests/**/*.test.js"
+    "test": "mocha --compilers js:babel-register test/tests/**/*.test.js",
+    "lint": "./node_modules/.bin/eslint ./lib ./test"
   },
   "contributors": [
     {
@@ -66,6 +67,7 @@
     "standard-version": "^4.0.0"
   },
   "dependencies": {
+    "babel-polyfill": "^6.26.0",
     "source-map-support": "^0.4.11"
   }
 }
