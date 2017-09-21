@@ -107,6 +107,38 @@ const blogPost = { title: 'Hello, World!', body: 'To be continued...', createdAt
 const document = transformalizer.transform({ name: 'blog-post', source: blogPost })
 ```
 
+---
+
+### transformalizer.untransform(params) => Object
+
+Reconstruct data objects from a json api document.
+
+###### Parameters
+| Name | Type | Description |
+| --- | --- | --- |
+| params | Object | |
+| params.document | Object | json api document |
+| params.options={} | Object | additional data to be passed to untransform functions, this will be merged with the global options |
+
+###### Examples
+```javascript
+const payload = { data: { id: '1', type: 'blog-post', attributes: { title: 'Hello, World!', body: 'To be continued...', createdAt: '2017-09-19T13:10:00' } } }
+const data = transformalizer.untransform({ document: payload })
+```
+
+
+
+## Options
+
+Global options are passed in when creating a new transformalizer object.  Options can also be passed in when transforming source objects to the json-api format or untransforming a json-api document back to data objects.
+
+###### Options for Untransforming Json-Api Documents
+| Name | Type | Description |
+| --- | --- | --- |
+| untransformIncluded | Boolean | A value indicating whether included resources are untransformed back to data objects |
+| nestIncluded | Boolean | A value indicating whether the full object hierarchy is recreated using the included data objects.  **Caveat:** This can lead to circular references. |
+| removeCircularDependencies | Boolean | A value indicating whether circular dependencies in the full object hierarchy should be removed.  **Caveat:** This may lead to an unexpected object hierarchy depending on how the data relationships are structured. |
+
 
 
 ## Schema
@@ -122,7 +154,10 @@ A schema object defines a set of functions used to transform your raw data into 
   },
   data: {
     dataSchema({ source, options, data }) {
-      return 'other-schema-name'
+      return 'other-schema-name';
+    },
+    untransformDataSchema({ type, resource, document, options }) {
+      return 'my-type';
     },
     type({ source, options, data, state }) {
       return 'my-type';
@@ -130,7 +165,13 @@ A schema object defines a set of functions used to transform your raw data into 
     id({ source, options, data, type, state }) {
       return data.id.toString();
     },
+    untransformId({ id, type, options }) {
+      return parseInt(id, 10);
+    },
     attributes({ source, options, data, type, id, state }) {
+      return { /* resource attributes */ }
+    },
+    untransformAttributes({ id, type, attributes, resource, options }) {
       return { /* resource attributes */ }
     },
     relationships: {
@@ -205,7 +246,7 @@ A function that should return the type of the resource being processed. If this 
 
 ### data.id(params) => String <small>optional</small>
 
-A function that should return the id of the resource being processed. If this is not provided, it is assumed that the "id" of the resource is simply the "id" property of the source object.
+A function that should return the id of the data object being processed. If this is not provided, it is assumed that the "id" of the resource is simply the "id" property of the source object.
 
 ###### Parameters
 | Name | Type | Description |
@@ -216,6 +257,20 @@ A function that should return the id of the resource being processed. If this is
 | params.data | Object | the current item being processed when source is an array, or the source itself if not an array |
 | params.type | String | the resource type determined in the `data.type` step |
 | params.state | Object | the recommended namespace for passing information between data level methods, useful for storing calculated data that is needed in multiple places |
+
+---
+
+### data.untransformId(params) => Object <small>optional</small>
+
+A function that should return the id of the resource being processed. If this is not provided, it is assumed that the "id" of the data object is simply the "id" property of the resource.
+
+###### Parameters
+| Name | Type | Description |
+| --- | --- | --- |
+| params | Object | |
+| params.id | String | the resource id |
+| params.type | String | the resource type |
+| params.options | Object | any options passed to the #untransform function |
 
 ---
 
@@ -233,6 +288,21 @@ A function that should return the attributes portion of the resource being proce
 | params.type | String | the resource type determined in the `data.type` step |
 | params.id | String | the id of the current resource, determined in the `data.id` step |
 | params.state | Object | the recommended namespace for passing information between data level methods, useful for storing calculated data that is needed in multiple places |
+
+---
+### data.untransformAttributes(params) => Object <small>optional</small>
+
+A function that should return the attributes portion of the data object being processed. If this is not provided, it is assumed that the attributes of the data object are simply the "attributes" property of the resource.
+
+###### Parameters
+| Name | Type | Description |
+| --- | --- | --- |
+| params | Object | |
+| params.id | Object | the id of the current data object, determined in the `data.untransformId` step |
+| params.type | String | the resource type |
+| params.attributes | Object | the json-api resource object attributes |
+| params.resource | Object | the full json-api resource object |
+| params.options | Object | any options passed to the #untransform function |
 
 ---
 
@@ -314,6 +384,21 @@ A function that should return the name of a schema to use to transform the curre
 | params.source | Object[],Object | the source data passed to the #transform function |
 | params.options | Object | any options passed to the #transform function |
 | params.data | Object | the current item being processed when source is an array, or the source itself if not an array |
+
+---
+
+### data.untransformDataSchema(params) => String <small>optional</small>
+
+A function that should return the name of a schema to use to untransform the current resource.
+
+###### Parameters
+| Name | Type | Description |
+| --- | --- | --- |
+| params | Object | |
+| params.type | String | the resource type |
+| params.resource | Object | the full json-api resource object |
+| params.document | Object | the full json-api document |
+| params.options | Object | any options passed to the #untransform function |
 
 
 
