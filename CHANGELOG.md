@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.1.2"></a>
+## [1.1.2](https://github.com/GaiamTV/transformalizer/compare/v1.1.1...v1.1.2) (2017-11-26)
+
+
+### Bug Fixes
+
+* **transform:** allow resource linkage to be null ([#24](https://github.com/GaiamTV/transformalizer/issues/24)) ([9d8f246](https://github.com/GaiamTV/transformalizer/commit/9d8f246))
+
+
+
 <a name="1.1.1"></a>
 ## [1.1.1](https://github.com/GaiamTV/transformalizer/compare/v1.1.0...v1.1.1) (2017-10-04)
 
