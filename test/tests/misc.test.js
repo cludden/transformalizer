@@ -22,5 +22,13 @@ describe('miscellaneous', function () {
     const uniqueIncluded = _.uniqBy(payload.included, included => `${included.type}:${included.id}`)
 
     expect(uniqueIncluded).to.be.an('array').with.lengthOf(payload.included.length)
+  }),
+
+  it('the data attribute can be null for empty to-one relations', function () {
+    const book = { id: 1, title: 'Beowulf', author: null }
+
+    const payload = transformalizer.transform({ name: 'book', source: book })
+
+    expect(payload.data.relationships.author.data).to.be.a('null')
   })
 })

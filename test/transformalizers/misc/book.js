@@ -15,8 +15,11 @@ export default {
       relationships: {
         author({ data }) {
           const author = R.prop('author', data)
-          if (!author) {
+          if (typeof author === 'undefined') {
             return undefined
+          }
+          if (!author) {
+            return { data: null }
           }
           return {
             data: {
